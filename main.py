@@ -20,11 +20,13 @@ def clean_data(path_in, path_out):
     print("去重后，有效数据{}行".format(len(data_out)))
 
 def data_area(data_in):
-    
+    data_count_city = data_in
 
 def main():
     if not os.path.exists(os.path.join(data_out_path, 'result.csv')):
         clean_data(data_in_path, data_out_path)
+        
+    data_area()
 
 if __name__ == '__main__':
     main()
