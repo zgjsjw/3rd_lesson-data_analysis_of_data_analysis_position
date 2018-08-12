@@ -1,15 +1,19 @@
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
+from PIL import Image
 import numpy as np
 from wordcloud import WordCloud
 import jieba
+import jieba.analyse
 
 data_in_path = './data'
 data_out_path = './result'
 plt.rcParams['font.sans-serif'] = ['SimHei']  # 用来正常显示中文标签
 plt.rcParams['axes.unicode_minus'] = False  # 用来正常显示负号
+font_path = "C:/Users/JIWei/Desktop/project_data_analysis/aaa.ttf"
+pic = "C:/Users\JIWei\Desktop\project_data_analysis/Alice.png"
+print(pic)
 
 def clean_data(path_in, path_out):
     if not os.path.exists(path_out):
@@ -102,13 +106,33 @@ def experience(data_in):
     plt.savefig(os.path.join(data_out_path, 'experience.png'))
 
 #先分析词云，再分析学历信息
-def word():
-    f = open('C:/Users/JIWei/Desktop/project_data_analysis/word_test.txt', 'r').read()
+def get_key_words(text):
+    words = jieba.analyse.extract_tags(text, topK=20)
+    return words
+def word(data):
+    data['text'] = data['类别'].apply(get_key_words).map(lambda t:','.join(t))
+    #print(data['text'])
+    text_name = 'keywords.txt'
+    text_path = os.path.join(data_out_path,text_name)
+    #print(text_path)
+    file = open(text_path, 'w')
+    for word in data['text']:
+        #print(word)
+        file.writelines(word+',')
+
+    file.close()
+    Alice_mask = np.array(Image.open(pic))
+    f = open(text_path).read().replace('数据分析','')\
+        .replace('数据挖掘','').replace('数据','')
     print(f)
-    wordcloud = WordCloud(background_color="white", width=1000, height=860, margin=2).generate(f)
-    plt.imshow(wordcloud)
+    wordcloud = WordCloud(font_path=font_path, collocations=False, background_color="white",
+                          mask=Alice_mask, scale=2,
+                          prefer_horizontal=0.6).generate(f)
+    #wordcloud = WordCloud(width=800, height=400, background_color="white")
+    plt.figure()
+    plt.imshow(wordcloud,interpolation='bilinear')
     plt.axis("off")
-    plt.show()
+    plt.savefig(os.path.join(data_out_path, 'word.png'), dpi=500)
 
 def main():
     if not os.path.exists(os.path.join(data_out_path, 'result.csv')):
@@ -121,7 +145,7 @@ def main():
     data_salary(data)
     salary_area(data)
     experience(data)
-    #word()
+    word(data)
 
 if __name__ == '__main__':
     main()
